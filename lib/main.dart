@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   runApp(const TaskFlowApp());
@@ -9,20 +10,20 @@ class TaskFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'TaskFlow',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const TaskListScreen(),
+      routerConfig: appRouter,
     );
   }
 }
 
 class Task {
-  const Task({
+  Task({
     required this.id,
     required this.title,
     required this.description,
@@ -34,10 +35,10 @@ class Task {
   final String title;
   final String description;
   final String priority;
-  final bool isCompleted;
+  bool isCompleted;
 }
 
-const demoTasks = [
+final demoTasks = [
   Task(
     id: 1,
     title: 'Diseñar la interfaz principal',
@@ -75,15 +76,30 @@ const demoTasks = [
   ),
 ];
 
+final appRouter = GoRouter(
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => const TaskListScreen()),
+    GoRoute(
+      path: '/task/:id',
+      builder: (context, state) {
+        final taskId = int.parse(state.pathParameters['id']!);
+        return TaskDetailScreen(taskId: taskId);
+      },
+    ),
+  ],
+);
+
 class TaskCard extends StatelessWidget {
-  const TaskCard({super.key, required this.task});
+  const TaskCard({super.key, required this.task, this.onTap});
 
   final Task task;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
+        onTap: onTap,
         leading: Icon(
           task.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
           color: task.isCompleted ? Colors.green : null,
@@ -96,9 +112,14 @@ class TaskCard extends StatelessWidget {
   }
 }
 
-class TaskListScreen extends StatelessWidget {
+class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
 
+  @override
+  State<TaskListScreen> createState() => _TaskListScreenState();
+}
+
+class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,8 +129,105 @@ class TaskListScreen extends StatelessWidget {
         itemCount: demoTasks.length,
         itemBuilder: (context, index) {
           final task = demoTasks[index];
-          return TaskCard(task: task);
+          return TaskCard(
+            task: task,
+            onTap: () async {
+              await context.push('/task/${task.id}');
+
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          );
         },
+      ),
+    );
+  }
+}
+
+class TaskDetailScreen extends StatefulWidget {
+  const TaskDetailScreen({super.key, required this.taskId});
+
+  final int taskId;
+
+  @override
+  State<TaskDetailScreen> createState() => _TaskDetailScreenState();
+}
+
+class _TaskDetailScreenState extends State<TaskDetailScreen> {
+  late bool isCompleted;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final task = demoTasks.firstWhere((item) => item.id == widget.taskId);
+
+    isCompleted = task.isCompleted;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final task = demoTasks.firstWhere((item) => item.id == widget.taskId);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Detalle de tarea'), centerTitle: true),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(task.title, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 24),
+            const Text(
+              'Descripción completa',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(task.description),
+            const SizedBox(height: 24),
+            const Text(
+              'Prioridad',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Chip(avatar: const Icon(Icons.flag), label: Text(task.priority)),
+            const SizedBox(height: 24),
+            const Text(
+              'Estado de la tarea',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  isCompleted ? Icons.check_circle : Icons.pending_actions,
+                  color: isCompleted ? Colors.green : Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                Text(isCompleted ? 'Completada' : 'Pendiente'),
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () {
+                  setState(() {
+                    isCompleted = !isCompleted;
+                    task.isCompleted = isCompleted;
+                  });
+                },
+                icon: Icon(isCompleted ? Icons.undo : Icons.check),
+                label: Text(
+                  isCompleted
+                      ? 'Marcar como pendiente'
+                      : 'Marcar como completada',
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
