@@ -56,5 +56,45 @@ POST     /tasks         Registrar una nueva tarea
 PATCH    /tasks/:id     Actualizar parcialmente una tarea
 DELETE   /tasks/:id     Eliminar una tarea
 
-La API concreta se elegirá después. Estas rutas son requisitos, no
-direcciones de un servidor ya conectado.
+Las rutas anteriores representan el contrato de API previsto para futuras funcionalidades de TaskFlow. Actualmente, la aplicación utiliza JSONPlaceholder para consultar tareas mediante GET /todos.
+
+## API de tareas
+
+### Conexión con la API
+TaskFlow utiliza la API JSONPlaceholder para consultar tareas de forma remota mediante el paquete Dio.
+- URL: https://jsonplaceholder.typicode.com
+- Recurso: /todos
+- Método HTTP: GET
+- Parámetro: userId=2
+- URL completa de consulta: https://jsonplaceholder.typicode.com/todos?userId=2
+
+### Parámetro de consulta
+Se utiliza el parámetro userId para obtener las tareas correspondientes a un usuario específico. Para esta adaptación del proyecto se seleccionó el usuario 2.
+
+### Campos recibidos
+La API proporciona los siguientes campos:
+- userId: identificador del usuario.
+- id: identificador de la tarea.
+- title: título de la tarea.
+- completed: estado de finalización.
+
+### Valores predeterminados
+El modelo Task, mediante el método Task.fromJson, transforma los datos recibidos y completa los campos que no proporciona la API:
+- description: "Sin descripción (API)".
+- priority: "Sin prioridad (API)".
+El campo completed se adapta al atributo isCompleted del modelo Task.
+
+### Arquitectura de consulta
+La aplicación utiliza la siguiente cadena de responsabilidades:
+Service → Repository → ViewModel
+- Service: realiza la petición HTTP mediante Dio.
+- Repository: administra la fuente de datos y entrega las tareas.
+- ViewModel: gestiona la información que utiliza la interfaz.
+La consulta utiliza Future, async y await para trabajar de forma asíncrona.
+
+### Actualización del estado de las tareas
+Actualmente, marcar una tarea como completada modifica únicamente la copia de la tarea en memoria mediante copyWith. Este cambio no se envía al servidor ni se conserva después de reiniciar la aplicación.
+
+### Comprobación
+Se verifica la conexión mediante el código HTTP 200, que indica que la consulta se realizó correctamente.
+El usuario seleccionado para esta adaptación es el usuario 2.
