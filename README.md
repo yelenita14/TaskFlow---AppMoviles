@@ -98,3 +98,43 @@ Actualmente, marcar una tarea como completada modifica únicamente la copia de l
 ### Comprobación
 Se verifica la conexión mediante el código HTTP 200, que indica que la consulta se realizó correctamente.
 El usuario seleccionado para esta adaptación es el usuario 2.
+
+## Semana 4 Sesión 8
+
+### Objetivo
+Implementar el manejo de estados asíncronos en TaskFlow para diferenciar la carga de información, la disponibilidad de tareas, las respuestas vacías y los errores de conexión, incorporando la opción de reintentar la consulta sin reiniciar la aplicación.
+
+### Gestión de estados
+Se actualizaron los archivos tasks_view_model.dart y task_list_screen.dart para controlar los diferentes estados de la aplicación.
+Se implementaron los siguientes estados:
+- Carga: muestra un indicador CircularProgressIndicator mientras se realiza la petición al servidor.
+- Éxito: muestra la lista de tareas obtenidas desde JSONPlaceholder.
+- Vacío: muestra el mensaje "Todavía no hay tareas para mostrar" cuando la consulta devuelve una lista sin elementos.
+- Error: muestra el mensaje "No se pudieron cargar las tareas" cuando ocurre un problema durante la consulta y presenta el botón Reintentar.
+
+### Herramientas y funcionalidades utilizadas
+- ChangeNotifier: notifica los cambios de estado del ViewModel.
+- context.watch: permite observar los cambios del ViewModel y actualizar la interfaz.
+- context.read: permite ejecutar acciones desde los botones.
+- Future y async/await: permiten realizar consultas asíncronas.
+- try/catch/finally: permiten controlar los errores y finalizar el estado de carga.
+- RefreshIndicator: permite actualizar la lista deslizando hacia abajo.
+- Botón Actualizar: permite realizar una nueva consulta al servidor.
+- Botón Reintentar: permite repetir la consulta después de un error.
+
+### Pruebas realizadas
+1. Estado de éxito
+Se realizó una consulta a JSONPlaceholder utilizando el usuario 2. Se verificó que las tareas se mostraran correctamente en la pantalla principal y que fuera posible acceder al detalle de cada tarea.
+2. Estado de carga
+Se verificó el indicador de carga mientras la aplicación realizaba la petición de información al servidor.
+3. Estado vacío
+Se cambió temporalmente el valor de userId de 2 a 9999 en task_api_service.dart. Al realizar la consulta, la aplicación mostró el mensaje "Todavía no hay tareas para mostrar" y el botón Actualizar.
+Después de la prueba se restauró el valor original userId = 2.
+4. Estado de error
+Se desactivó la conexión a internet del emulador y se solicitó actualizar la lista. La aplicación mostró el mensaje "No se pudieron cargar las tareas" y el botón Reintentar.
+5. Prueba de reintento
+Se restableció la conexión a internet y se pulsó el botón Reintentar. La aplicación volvió a consultar el servidor y recuperó la lista de tareas sin necesidad de reiniciarla.
+
+### Resultado obtenido
+
+TaskFlow diferencia correctamente los estados de carga, éxito, vacío y error. Además, permite actualizar y recuperar la información mediante los botones correspondientes, conservando la navegación entre la lista y el detalle de las tareas.
