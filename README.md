@@ -138,3 +138,34 @@ Se restableció la conexión a internet y se pulsó el botón Reintentar. La apl
 ### Resultado obtenido
 
 TaskFlow diferencia correctamente los estados de carga, éxito, vacío y error. Además, permite actualizar y recuperar la información mediante los botones correspondientes, conservando la navegación entre la lista y el detalle de las tareas.
+
+
+## Semana 5 Sesión 9
+
+### Objetivo
+Implementar un formulario para registrar nuevas tareas en TaskFlow, incorporando campos de texto, validaciones y selección de prioridad.
+
+### Funcionalidades implementadas
+- Formulario de creación de tareas utilizando Form.
+- Validación del título: campo obligatorio y mínimo 3 caracteres.
+- Validación de la descripción: campo obligatorio y mínimo 5 caracteres.
+- Controladores TextEditingController para obtener los datos ingresados.
+- Selector de prioridad mediante DropdownButtonFormField.
+- Selector de fecha de entrega utilizando showDatePicker.
+- Fecha de entrega opcional, no obligatoria para guardar.
+- Mensajes personalizados para los errores de validación.
+- Botón Guardar para validar y preparar los datos de la tarea.
+- Botón Cancelar para regresar a la lista sin enviar información.
+- Retorno de los datos mediante TaskDraft y context.pop(draft).
+
+### Validaciones realizadas
+Se realizaron pruebas para comprobar el funcionamiento del formulario:
+1. Título vacío: muestra un mensaje de error.
+2. Título de dos caracteres: muestra un mensaje indicando que se requieren al menos tres caracteres.
+3. Título válido: permite continuar cuando los demás campos son correctos.
+4. Fecha opcional: permite preparar una tarea sin seleccionar una fecha.
+5. Cancelar: regresa a la pantalla de tareas sin mostrar el mensaje de formulario válido.
+6. Mensaje de retorno: muestra el título de la tarea después de guardar el borrador.
+
+### Resultado
+Se implementó un formulario funcional con validaciones, controladores, selector de prioridad y fecha de entrega opcional. Los datos se preparan como un borrador temporal y se devuelven a la pantalla anterior.
